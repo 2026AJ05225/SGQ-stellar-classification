@@ -12,7 +12,7 @@ from sklearn.metrics import classification_report, confusion_matrix
 from sdss_utils import (CLASS_NAMES, CLASS_TO_ID, FEATURES, METRIC_COLS,
                         MODEL_FILES, TARGET, compute_metrics)
 
-st.set_page_config(page_title="SDSS17 Sky Object Classifier", page_icon="🔭",
+st.set_page_config(page_title="SGQ Sky Object Classifier", page_icon="🔭",
                    layout="wide")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -36,7 +36,7 @@ def score_all(X, y):
 
 # ------------------------------------------------------------ header
 st.title("🔭 Star, Galaxy or Quasar?")
-st.caption("SDSS DR17 stellar classification | five classical ML models | "
+st.caption("SDSS DR17 SGQ Stellar Classification | 5 classical ML models | "
            "saved models, no retraining on your upload")
 
 # ------------------------------------------------------------ sidebar
@@ -128,8 +128,8 @@ with tab_all:
     st.subheader("Metrics on the uploaded data")
     st.dataframe(table.style.format("{:.4f}").highlight_max(axis=0, color="#2b6e4f"),
                  use_container_width=True)
-    st.bar_chart(table[["Accuracy", "F1", "MCC"]])
-    st.success(f"Best MCC on this data: **{table['MCC'].idxmax()}**")
+    st.bar_chart(table[["Accuracy", "F1 Score", "MCC Score"]])
+    st.success(f"Best MCC Score on this data: **{table['MCC Score'].idxmax()}**")
     st.download_button("⬇️ Download metrics table (CSV)",
                        table.round(4).to_csv().encode(),
                        file_name="model_comparison_metrics.csv", mime="text/csv")
