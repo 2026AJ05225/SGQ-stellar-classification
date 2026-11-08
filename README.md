@@ -174,7 +174,12 @@ Place the downloaded `star_classification.csv` dataset in the dataset directory:
 ```text
 dataset/star_classification.csv
 ```
-Also, Model script will automatically check and download the dataset if not exist locally.
+OR
+```text
+Downloads/star_classification.csv
+```
+
+Also,even if we don't download and place the dataset in the directory, Model script will automatically check and download the dataset if not exist locally.
 
 ### 3. Model Training & Pipeline Serialization
 
@@ -200,17 +205,19 @@ Select **"Run All Cells"**. Training cleans the dataset, splits partitions (80:2
 
 ### 4. Launching the Local Streamlit App
 
+Open and run the terminal in the directory of `app.py`.
 ```bash
 streamlit run app.py
 ```
-Open `http://localhost:8501` in your browser.
+OR
+Open `https://sgq-stellar-classification.streamlit.app/` in your browser.
 
 ### 5. Deployment to Streamlit Community Cloud
 
 1. Push repository commits to GitHub (ensure `model/` directory and `test_data.csv` are tracked).
 2. Sign into [Streamlit Community Cloud](https://share.streamlit.io/).
 3. Create a new app linked to repository `2026AJ05225/SGQ-stellar-classification`, branch `main`, and main file `app.py`.
-4. Click **Deploy!**.
+4. Click **Deploy**.
 
 ---
 
@@ -221,14 +228,3 @@ Open `http://localhost:8501` in your browser.
 * **Library Version Consistency:** Ensure `scikit-learn` version parity between training environments and deployment servers to prevent serialization discrepancies during `.joblib` loading.
 * **Astronomical Generalization Warning:** The inclusion of non-physical survey metadata (`plate`, `MJD`, `fiber_ID`, `run_ID`) means performance metrics reflect the SDSS DR17 observation strategy. Deployment on non-SDSS sky survey datasets (e.g., Gaia, LSST) would require retraining exclusively on physical magnitudes (`u, g, r, i, z`) and spectroscopic attributes.
 
----
-
-## H. Submission Checklist
-
-- [x] GitHub repository link is active and public.
-- [x] All source code (`app.py`, `train.ipynb`, `train.py`, `sdss_utils.py`), `requirements.txt`, and `README.md` are committed.
-- [x] Pre-trained model artifacts (`model/*.joblib`) and held-out test split (`test_data.csv`) are committed.
-- [x] Streamlit web application is deployed and verified interactive.
-- [x] App tested using uploaded `test_data.csv` with accurate metric calculations.
-- [x] Actual measured metric values, error analysis, and comparative tables populated in documentation.
-- [x] BITS Virtual Lab execution verified and screenshot captured for submission PDF.
