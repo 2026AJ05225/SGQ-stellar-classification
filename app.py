@@ -1,7 +1,7 @@
 """Streamlit app: evaluate saved SDSS17 classifiers on an uploaded test CSV.
 Models are loaded from model/*.joblib and are NOT retrained."""
 import os
-
+import subprocess
 import joblib
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -16,7 +16,17 @@ st.set_page_config(page_title="SGQ Sky Object Classifier", page_icon="🔭",
                    layout="wide")
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+MODEL_DIR = os.path.join(HERE, "model")
 
+# Auto-train fallback if model files are missing on Streamlit Cloud
+if not os.path.exists(MODEL_DIR) or not os.listdir(MODEL_DIR):
+    st.warning("⚠️ Model files not found locally. Running training script...")
+    try:
+        subprocess.run(["python", "train_models.py"], check=True)
+        st.success("✅ Models trained and saved successfully!")
+    except Exception as err:
+        st.error(f"Failed to run training script: {err}")
+        st.stop()
 
 @st.cache_resource
 def load_model(name):
