@@ -22,7 +22,7 @@ MODEL_DIR = os.path.join(HERE, "model")
 if not os.path.exists(MODEL_DIR) or not os.listdir(MODEL_DIR):
     st.warning("⚠️ Model files not found locally. Running training script...")
     try:
-        subprocess.run(["python", "train_models.py"], check=True)
+        subprocess.run(["python", "train.py"], check=True)
         st.success("✅ Models trained and saved successfully!")
     except Exception as err:
         st.error(f"Failed to run training script: {err}")
