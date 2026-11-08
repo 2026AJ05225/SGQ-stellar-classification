@@ -1,4 +1,4 @@
-# Stellar Classification (SDSS DR17) — Star vs Galaxy vs Quasar
+# SGQ Stellar Classification (SDSS DR17) — Star vs Galaxy vs Quasar
 
 ---
 
