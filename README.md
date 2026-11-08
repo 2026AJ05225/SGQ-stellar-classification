@@ -1,97 +1,234 @@
-# Stellar Classification (SDSS17) — Star vs Galaxy vs Quasar
-This project develops a three-class machine learning pipeline to classify astronomical objects from the Sloan Digital Sky Survey (SDSS Data Release 17) as a STAR, GALAXY, or QSO (quasar) using photometric and spectroscopic measurements.
-## a. Problem statement
+# Stellar Classification (SDSS DR17) — Star vs Galaxy vs Quasar
 
-The objective is to build, compare, and deploy supervised machine-learning classifiers—specifically five classical ML models/classification algorithms trained on the same dataset—to predict and identify astronomical objects as a **GALAXY**, **STAR**, or **QSO** (quasar). Utilizing numerical observations comprising photometric and spectroscopic measurements from the Sloan Digital Sky Survey Data Release 17 (SDSS17), this three-class classification problem evaluates model performance across six comprehensive evaluation metrics: **Accuracy**, **AUC** (Area Under the Curve), **Precision**, **Recall**, **F1-score**, and **Matthews Correlation Coefficient (MCC)**. Ultimately, the trained and saved models are demonstrated in a deployed Streamlit web application that accepts and evaluates an uploaded test CSV file.
+---
 
-## b. Dataset Description
+## A. Problem Statement
 
-* **Dataset Name:** Stellar Classification Dataset — SDSS17 (by fedesoriano on Kaggle), derived from Sloan Digital Sky Survey Data Release 17 (SDSS DR17)
-* **Dataset Source:**
-* **URL:** 
-1. https://raw.githubusercontent.com/FentanesOscar/StellarClassification/main/star_classification.csv
-2. https://www.kaggle.com/datasets/fedesoriano/stellar-classification-dataset-sdss17
+The objective is to build, compare, and deploy supervised machine-learning classifiers—specifically five classical ML models/classification algorithms trained on the same dataset—to predict and identify astronomical objects as a **GALAXY**, **STAR**, or **QSO** (quasar). Utilizing numerical observations comprising photometric and spectroscopic measurements from the Sloan Digital Sky Survey Data Release 17 (SDSS DR17), this three-class classification problem evaluates model performance across six comprehensive evaluation metrics: **Accuracy**, **AUC** (Area Under the Curve, Macro OvR), **Precision** (Macro), **Recall** (Macro), **F1-score** (Macro), and **Matthews Correlation Coefficient (MCC)**. Ultimately, the trained and saved model pipelines are demonstrated in an interactive, deployed Streamlit web application that accepts and evaluates an uploaded test CSV file.
 
-* **Expected local path:** `Downloads/star_classification.csv`
+---
 
+## B. Dataset Description
+
+* **Dataset Name & Source:** Stellar Classification Dataset — SDSS17 (by fedesoriano on Kaggle), derived from Sloan Digital Sky Survey Data Release 17 (SDSS DR17).
+* **Dataset Sources & Downloads:**
+  * **Kaggle Link:** [Kaggle SDSS17 Dataset](https://www.kaggle.com/datasets/fedesoriano/stellar-classification-dataset-sdss17)
+  * **Direct CSV Mirror:** [GitHub Raw Mirror](https://raw.githubusercontent.com/FentanesOscar/StellarClassification/main/star_classification.csv)
+  * **Expected Local Path:** `dataset/star_classification.csv` (or `Downloads/star_classification.csv`)
 * **Domain:** Astronomy / Astrophysics.
-* **Task & Target:** Three-class supervised multi-class classification predicting the target `class` $\in$ {**GALAXY**, **QSO**, **STAR**}.
-* **Dataset Size & Structure:** Contains 100,000 raw observations across 18 total columns (17 numeric input/feature columns + 1 target column `class`). This comfortably satisfies the baseline requirement of at least 12 features and 500 instances.
-* **Class Balance (Full Data):**
-* **GALAXY:** ~59,400 instances
-* **STAR:** ~21,600 instances
-* **QSO:** ~19,000 instances
+* **Task & Target:** Three-class supervised multi-class classification predicting target `class` $\in$ {**GALAXY**, **QSO**, **STAR**}.
+* **Dataset Size & Structure:** Contains 100,000 raw observations across 18 total columns (17 numeric input/feature columns + 1 target column `class`). This comfortably satisfies the assignment requirement of at least 12 features and 500 instances.
+* **Class Balance (Cleaned Data — 99,999 rows):**
+  * **GALAXY:** 59,445 instances (~59.4%)
+  * **STAR:** 21,593 instances (~21.6%)
+  * **QSO:** 18,961 instances (~19.0%)
 
-
-**Note:** Due to class imbalance, macro-averaged evaluation metrics are reported.
+*Note:* Because the classes are imbalanced, macro-averaged Precision, Recall, and F1-score are reported alongside MCC.
 
 ### Input Features & Data Dictionary
 
-| Feature | Type / Category | Meaning & Physical Context |
-| --- | --- | --- |
-| `alpha`, `delta` | Celestial Coordinates | Right ascension ($\alpha$) and declination ($\delta$) representing sky position |
-| `u`, `g`, `r`, `i`, `z` | Photometry | Photometric magnitudes in ultraviolet, green, red, near-IR, and IR passband filters |
-| `redshift` | Spectroscopy | Spectroscopic redshift measurement derived from the object's spectrum |
-| `run_ID`, `cam_col`, `field_ID` | Survey Metadata | Imaging run number, camera column, and field identifier |
-| `plate`, `MJD`, `fiber_ID` | Spectroscopic Metadata | Spectroscopic plate number, Modified Julian Date (observation date), and fiber identifier |
-| `obj_ID`, `spec_obj_ID` | Unique Identifiers | Database object ID and spectroscopic object ID |
-| `rerun_ID` | Survey Metadata | Image processing rerun identifier (constant value across dataset) |
+| Feature | Type / Category | Meaning & Physical Context | Included in Training |
+|---|---|---|---|
+| `alpha`, `delta` | Celestial Coordinates | Right ascension ($\alpha$) and declination ($\delta$) representing sky position | Yes |
+| `u`, `g`, `r`, `i`, `z` | Photometry | Photometric magnitudes in ultraviolet ($u$), green ($g$), red ($r$), near-IR ($i$), and IR ($z$) filter bands | Yes |
+| `redshift` | Spectroscopy | Spectroscopic redshift measurement derived from spectral lines | Yes |
+| `run_ID`, `cam_col`, `field_ID` | Survey Metadata | Imaging run number, camera column, and field identifier | Yes |
+| `plate`, `MJD`, `fiber_ID` | Spectroscopic Metadata | Spectroscopic plate number, Modified Julian Date (observation date), and fiber identifier | Yes |
+| `obj_ID`, `spec_obj_ID` | Unique Identifiers | Unique database object ID and spectroscopic object ID | **No (Dropped)** |
+| `rerun_ID` | Survey Metadata | Image processing rerun identifier (constant value across dataset) | **No (Dropped)** |
 
 ### Feature Handling, Selection & Scientific Limitations
 
-* **Dropped Columns:** `obj_ID` and `spec_obj_ID` are dropped as unique record identifiers, and `rerun_ID` is removed due to zero variance (constant value). The remaining 14 features are utilized for model training.
-* **Methodological Limitation (Survey Identifiers):** While standard models leverage physical photometric magnitudes (`u, g, r, i, z`) and spectroscopic `redshift`, retaining observational/survey metadata (e.g., `run_ID`, `plate`, `MJD`) can introduce dataset-specific spatial/instrumental artifacts that limit broader scientific generalization. This limitation is noted for analysis, with feature-ablation experiments recommended to assess physical model robustness.
+* **Dropped Columns:** `obj_ID` and `spec_obj_ID` were dropped as pure database identifiers, and `rerun_ID` was removed due to zero variance (constant value). The remaining 14 numerical features (exceeding the 12-feature minimum requirement) were retained for model training.
+* **Methodological Limitation (Survey Identifiers):** While standard models leverage physical photometric magnitudes (`u`, `g`, `r`, `i`, `z`) and spectroscopic `redshift`, retaining observational metadata (e.g., `run_ID`, `plate`, `MJD`) can introduce survey-specific spatial or instrumental artifacts. High performance on this dataset may not guarantee generalization to data from other telescopes or sky surveys. A feature-ablation experiment isolating purely physical attributes is recommended for future scientific validation.
 
 ### Data Cleaning, Sampling & Preprocessing
 
-* **Data Cleaning:** Removed 1 anomalous record containing sentinel noise values (-9999 in the `u`, `g`, and `z` bands).
-* **Sampling & Stratified Split:** To mitigate computational bottlenecks (specifically $O(n^3)$ runtime scaling during SVM probability estimations), a stratified subsample of 30,000 rows is extracted. This subset is split 80/20 (stratified, `random_state = 42`) into:
-* **Train Set:** 24,000 rows (used for model training and cross-validation)
-* **Test Set:** 6,000 rows (saved as `test_data.csv` for independent evaluation and Streamlit app testing)
+1. **Data Cleaning:** Removed 1 anomalous record containing sentinel noise values (-9999 in the `u`, `g`, and `z` bands).
+2. **Sampling & Stratified Split:** To mitigate computational bottlenecks during Support Vector Machine (SVM) training (which scales $O(n^3)$ during probability estimation), a stratified subsample of 30,000 rows was extracted.
+3. **Train/Test Partition:** Split 80:20 in a stratified manner with `random_state = 42`:
+   * **Train Set:** 24,000 rows (used for model fitting)
+   * **Test Set:** 6,000 rows (held-out test split, saved as `test_data.csv`)
+   * **Held-out Test Class Distribution:** 3,567 GALAXY, 1,138 QSO, 1,295 STAR.
+4. **Feature Scaling:** `StandardScaler` was incorporated inside `scikit-learn` pipelines for distance- and gradient-sensitive algorithms (Logistic Regression, K-Nearest Neighbors, Gaussian Naive Bayes, and Support Vector Machines). Tree-based models (Decision Tree) bypass scaling and operate on raw feature values.
 
+---
 
-* **Feature Preprocessing:** Applied `StandardScaler` inside pipeline architectures for distance- and gradient-sensitive algorithms (Logistic Regression, K-Nearest Neighbors, Naive Bayes, and Support Vector Machines). Tree-based classifiers (Decision Tree) bypass feature scaling.
-## c. GitHub repository link
+## C. GitHub Repository Structure & Links
 
-<https://github.com/2026AJ05225/SGQ-stellar-classification/tree/main>
+* **GitHub Repository URL:** [https://github.com/2026AJ05225/SGQ-stellar-classification/tree/main](https://github.com/2026AJ05225/SGQ-stellar-classification/tree/main)
+* **Live Streamlit Web Application:** [https://sgq-stellar-classification.streamlit.app/](https://sgq-stellar-classification.streamlit.app/)
 
-Live app: <https://sgq-stellar-classification.streamlit.app/>
+### Directory Layout
 
+```text
+SGQ-stellar-classification/
+│
+├── app.py                  # Main Streamlit web application interface
+├── sdss_utils.py           # Helper utilities for metrics, feature list, and class mapping
+├── train.ipynb             # Jupyter Notebook for EDA, training, validation & model export
+├── train.py / train_models.py # Standalone Python script for automated CLI training
+├── requirements.txt        # Python package dependencies
+├── README.md               # Project documentation
+├── test_data.csv           # Held-out test split (6,000 rows, 14 features + class)
+│
+├── dataset/
+│   └── star_classification.csv  # Raw SDSS DR17 dataset (100,000 rows)
+│
+└── model/                  # Exported model artifacts & generated outputs
+    ├── logistic_regression.joblib
+    ├── decision_tree.joblib
+    ├── knn.joblib
+    ├── naive_bayes.joblib
+    ├── svm.joblib
+    ├── metrics.csv         # Measured metrics output
+    └── metrics_table.md    # Formatted Markdown metrics output
 ```
-sdss17-stellar-classifier/
-|-- app.py
-|-- sdss_utils.py
-|-- train_models.py
-|-- requirements.txt
-|-- README.md
-|-- test_data.csv
-|-- model/   (logistic_regression, decision_tree, knn, naive_bayes, svm .joblib + metrics.csv)
+
+---
+
+## D. Models Used and Evaluation
+
+The following five classification algorithms were trained on the identical 24,000-row training set and evaluated on the exact same 6,000-row held-out test dataset:
+
+1. **Logistic Regression:** Multiclass configuration with `max_iter=2000` inside a `StandardScaler` pipeline.
+2. **Decision Tree Classifier:** Hyperparameter-tuned decision tree with `max_depth=12`.
+3. **K-Nearest Neighbors (KNN):** Distance-weighted distance algorithm with $k=7$ neighbors inside a `StandardScaler` pipeline.
+4. **Gaussian Naive Bayes:** Probabilistic classifier inside a `StandardScaler` pipeline.
+5. **Support Vector Machine (SVM):** Radial Basis Function (RBF) kernel classifier with $C=1.0$ and `probability=True` inside a `StandardScaler` pipeline.
+
+### Model Comparison Table (6,000-Row Held-Out Test Set)
+
+| ML Model Name | Accuracy | AUC (Macro OvR) | Precision (Macro) | Recall (Macro) | F1-Score (Macro) | MCC |
+|---|---:|---:|---:|---:|---:|---:|
+| **Logistic Regression** | 0.9575 | **0.9876** | 0.9523 | 0.9522 | 0.9517 | 0.9250 |
+| **Decision Tree** | **0.9702** | 0.9718 | **0.9671** | **0.9639** | **0.9655** | **0.9470** |
+| **K-Nearest Neighbors** | 0.8907 | 0.9583 | 0.9077 | 0.8469 | 0.8727 | 0.8029 |
+| **Gaussian Naive Bayes** | 0.8997 | 0.9708 | 0.8777 | 0.9144 | 0.8920 | 0.8324 |
+| **Support Vector Machine** | 0.9563 | 0.9835 | 0.9542 | 0.9489 | 0.9512 | 0.9226 |
+
+---
+
+### Per-Class Recall & Misclassification Analysis
+
+| ML Model Name | GALAXY Recall | QSO Recall | STAR Recall | Total Test Errors | Primary Confusion Pair |
+|---|---:|---:|---:|---:|---|
+| **Logistic Regression** | 96.2% | 89.5% | **100.0%** | 255 | 120 QSO misclassified as GALAXY |
+| **Decision Tree** | **97.7%** | **91.8%** | 99.6% | **179** | 93 QSO misclassified as GALAXY |
+| **K-Nearest Neighbors** | 96.3% | 85.4% | 72.4% | 656 | 353 STAR misclassified as GALAXY |
+| **Gaussian Naive Bayes** | 87.3% | 87.9% | 99.2% | 602 | 423 GALAXY misclassified as QSO |
+| **Support Vector Machine** | 96.6% | 90.9% | 97.2% | 262 | 103 QSO misclassified as GALAXY |
+
+---
+
+### Detailed Observations on Model Performance
+
+* **Logistic Regression:** Demonstrates high overall performance (Accuracy: 0.9575) and achieves the **highest AUC score (0.9876)** across all models. It achieved perfect separation for stars (1,295 out of 1,295 correct). Its errors stem from distinguishing high-redshift quasars (QSO) from galaxies (120 quasars misclassified as galaxies), indicating that while the decision space is largely linearly separable after scaling, minor non-linear overlaps remain between galaxies and quasars.
+* **Decision Tree Classifier:** **Top overall performer.** Achieved the highest Accuracy (0.9702), Macro F1 (0.9655), and MCC (0.9470), making only 179 errors out of 6,000 test records. It captured sharp physical thresholds (such as specific spectroscopic `redshift` boundaries). Its slightly lower AUC (0.9718) is expected due to the step-function nature of decision tree leaf probability estimates.
+* **K-Nearest Neighbors (KNN):** Weakest performer (Accuracy: 0.8907, MCC: 0.8029). KNN struggled heavily on the STAR class, misclassifying 353 stars as galaxies (STAR recall: 72.4%). This degradation occurs because Euclidean distance calculation in 14-dimensional space gets influenced by non-physical survey metadata columns (`run_ID`, `MJD`, `plate`), even after standard scaling.
+* **Gaussian Naive Bayes:** Achieved an Accuracy of 0.8997 but suffered from low precision on quasars. It severely over-predicted QSO by misclassifying 423 galaxies as quasars. This stems from the violation of feature independence assumptions—photometric passband magnitudes (`u`, `g`, `r`, `i`, `z`) are strongly correlated with one another. However, it proved computationally lightweight and achieved strong STAR recall (99.2%).
+* **Support Vector Machine (SVM):** Showed strong performance (Accuracy: 0.9563, F1: 0.9512, AUC: 0.9835), performing almost identically to Logistic Regression. However, fitting non-linear RBF decision boundaries required significantly higher computational overhead (63.0s runtime vs 0.6s for Decision Tree) without yielding an accuracy advantage over tree-based methods.
+* **Overall Winner:** **Decision Tree Classifier.** It delivers superior metric scores (MCC: 0.9470, F1: 0.9655, Accuracy: 0.9702), fewest misclassification errors (179), balanced per-class recall, and fast execution speed.
+
+---
+
+## E. Streamlit Application
+
+The interactive web application (`app.py`), titled **"SGQ Sky Object Classifier"**, provides a user-friendly interface for model evaluation and inference:
+
+1. **Interactive Data Upload & Sample Selection:** Allows users to upload any external test CSV dataset, select a pre-bundled sample test split, or download `test_data.csv` directly from the interface.
+2. **Model Selection Dropdown:** Toggle dynamically between all five pre-trained model pipelines (`Logistic Regression`, `Decision Tree`, `KNN`, `Gaussian Naive Bayes`, `Support Vector Machine`).
+3. **Automated Six Metric Evaluation:** Computes and displays Accuracy, AUC (Macro OvR), Precision (Macro), Recall (Macro), F1-Score (Macro), and MCC Score.
+4. **Visual Confusion Matrix & Classification Report:** Renders interactive confusion matrix heatmaps using `seaborn`/`matplotlib` alongside per-class performance tables.
+5. **All-Models Performance Comparison:** Interactive bar charts and summary tables comparing all 5 saved models.
+6. **Batch CSV Prediction Export:** Generates predictions and probability scores for uploaded CSV test files, available for download.
+
+---
+
+## F. How to Run
+
+### 1. Environment Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/2026AJ05225/SGQ-stellar-classification.git
+cd SGQ-stellar-classification
+
+# Create and activate virtual environment
+python -m venv .venv
+
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+# Upgrade pip and install requirements
+pip install --upgrade pip
+pip install -r requirements.txt
+[On Jupyter Notebook: pip install -r requirements.txt]
 ```
 
-Run locally: `pip install -r requirements.txt`, then `python train_models.py star_classification.csv`, then `streamlit run app.py`.
+### 2. Dataset Placement
 
-## d. Models used
+Place the downloaded `star_classification.csv` dataset in the dataset directory:
+```text
+dataset/star_classification.csv
+```
+Also, Model script will automatically check and download the dataset if not exist locally.
 
-Metrics are computed on the held-out test split. Precision, Recall and F1 are macro-averaged; AUC is one-vs-rest macro.
+### 3. Model Training & Pipeline Serialization
 
-<PASTE CONTENTS OF model/metrics_table.md HERE>
+Execute model training and evaluation via CLI or Jupyter Notebook:
 
-### Observations
+**Option A: Running the Standalone Python Script**
+```bash
+python train.py --data dataset/star_classification.csv
+```
 
-| ML Model Name | Observation about model performance |
-|---|---|
-| Logistic Regression | <WRITE IN YOUR OWN WORDS> |
-| Decision Tree | <WRITE IN YOUR OWN WORDS> |
-| KNN | <WRITE IN YOUR OWN WORDS> |
-| Naive Bayes | <WRITE IN YOUR OWN WORDS> |
-| Support Vector Machine | <WRITE IN YOUR OWN WORDS> |
-| **Overall winner for this dataset** | <MODEL NAME + one-line reason> |
+**Option B: Executing the Jupyter Notebook**
+```bash
+jupyter notebook train.ipynb
+```
+Select **"Run All Cells"**. Training cleans the dataset, splits partitions (80:20), trains all 5 algorithms, writes metrics to `model/metrics.csv`, and serializes pipeline models as `.joblib` files.
 
-## Streamlit app features
+#### Measured Training Execution Times (BITS Virtual Lab)
+* **Logistic Regression:** ~2.2 s
+* **Decision Tree Classifier:** ~0.6 s
+* **K-Nearest Neighbors:** ~5.2 s
+* **Gaussian Naive Bayes:** ~0.1 s
+* **Support Vector Machine (RBF):** ~63.0 s
 
-- CSV upload of test data (with a bundled-sample option)
-- Model selection dropdown (five models)
-- Accuracy, AUC, Precision, Recall, F1 and MCC display
-- Confusion matrix heatmap and classification report
-- All-models comparison table and chart, plus downloadable predictions
-- Saved models are loaded from `model/`; nothing is retrained on the uploaded data
+### 4. Launching the Local Streamlit App
+
+```bash
+streamlit run app.py
+```
+Open `http://localhost:8501` in your browser.
+
+### 5. Deployment to Streamlit Community Cloud
+
+1. Push repository commits to GitHub (ensure `model/` directory and `test_data.csv` are tracked).
+2. Sign into [Streamlit Community Cloud](https://share.streamlit.io/).
+3. Create a new app linked to repository `2026AJ05225/SGQ-stellar-classification`, branch `main`, and main file `app.py`.
+4. Click **Deploy!**.
+
+---
+
+## G. Reproducibility & Limitations
+
+* **Deterministic Random State:** All sampling, splitting, and model initializations use `random_state = 42`.
+* **Subsampling Protocol:** Subsampling to 30,000 total rows preserves computational viability for SVM probability estimation while maintaining class distribution ratios.
+* **Library Version Consistency:** Ensure `scikit-learn` version parity between training environments and deployment servers to prevent serialization discrepancies during `.joblib` loading.
+* **Astronomical Generalization Warning:** The inclusion of non-physical survey metadata (`plate`, `MJD`, `fiber_ID`, `run_ID`) means performance metrics reflect the SDSS DR17 observation strategy. Deployment on non-SDSS sky survey datasets (e.g., Gaia, LSST) would require retraining exclusively on physical magnitudes (`u, g, r, i, z`) and spectroscopic attributes.
+
+---
+
+## H. Submission Checklist
+
+- [x] GitHub repository link is active and public.
+- [x] All source code (`app.py`, `train.ipynb`, `train.py`, `sdss_utils.py`), `requirements.txt`, and `README.md` are committed.
+- [x] Pre-trained model artifacts (`model/*.joblib`) and held-out test split (`test_data.csv`) are committed.
+- [x] Streamlit web application is deployed and verified interactive.
+- [x] App tested using uploaded `test_data.csv` with accurate metric calculations.
+- [x] Actual measured metric values, error analysis, and comparative tables populated in documentation.
+- [x] BITS Virtual Lab execution verified and screenshot captured for submission PDF.
