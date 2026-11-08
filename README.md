@@ -1,4 +1,4 @@
-# SGQ Stellar Classification (SDSS DR17) — Star vs Galaxy vs Quasar
+# Stellar Classification (SDSS DR17) — Star vs Galaxy vs Quasar
 
 ---
 
@@ -138,7 +138,7 @@ The interactive web application (`app.py`), titled **"SGQ Sky Object Classifier"
 
 1. **Interactive Data Upload & Sample Selection:** Allows users to upload any external test CSV dataset, select a pre-bundled sample test split, or download `test_data.csv` directly from the interface.
 2. **Model Selection Dropdown:** Toggle dynamically between all five pre-trained model pipelines (`Logistic Regression`, `Decision Tree`, `KNN`, `Gaussian Naive Bayes`, `Support Vector Machine`).
-3. **Automated Six Metric Evaluation:** Computes and displays Accuracy, AUC (Macro OvR), Precision (Macro), Recall (Macro), F1-Score (Macro), and MCC Score.
+3. **Automated Six Metric Evaluation:** Computes and displays Accuracy, AUC (Macro OvR), Precision (Macro), Recall (Macro), F1-Score (Macro), and MCC.
 4. **Visual Confusion Matrix & Classification Report:** Renders interactive confusion matrix heatmaps using `seaborn`/`matplotlib` alongside per-class performance tables.
 5. **All-Models Performance Comparison:** Interactive bar charts and summary tables comparing all 5 saved models.
 6. **Batch CSV Prediction Export:** Generates predictions and probability scores for uploaded CSV test files, available for download.
