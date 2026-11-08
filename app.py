@@ -18,14 +18,34 @@ st.set_page_config(page_title="SGQ Sky Object Classifier", page_icon="🔭",
 HERE = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(HERE, "model")
 
-# Auto-train fallback if model files are missing on Streamlit Cloud
-if not os.path.exists(MODEL_DIR) or not os.listdir(MODEL_DIR):
-    st.warning("⚠️ Model files not found locally. Running training script...")
+# Check which specific .joblib files are missing
+missing_models = [
+    MODEL_FILES[name] for name in MODEL_FILES 
+    if not os.path.exists(os.path.join(MODEL_DIR, MODEL_FILES[name]))
+]
+
+if missing_models:
+    st.warning("⚠️ Model files not found. Running training script...")
+    train_script = os.path.join(HERE, "train_models.py")
+
+    # Check if train_models.py actually exists
+    if not os.path.exists(train_script):
+        st.error(f"❌ Script missing: `{train_script}`. Make sure `train_models.py` is in your repository root!")
+        st.stop()
+
     try:
-        subprocess.run(["python", "train.py"], check=True)
+        # Run train_models.py using Streamlit's exact Python environment
+        result = subprocess.run(
+            [sys.executable, train_script],
+            check=True,
+            capture_output=True,
+            text=True
+        )
         st.success("✅ Models trained and saved successfully!")
-    except Exception as err:
-        st.error(f"Failed to run training script: {err}")
+    except subprocess.CalledProcessError as err:
+        st.error(f"❌ Training script failed (Exit Code {err.returncode}):")
+        # Output the exact error message on the screen
+        st.code(err.stderr or err.stdout, language="text")
         st.stop()
 
 @st.cache_resource
