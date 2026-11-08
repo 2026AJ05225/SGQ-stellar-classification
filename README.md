@@ -23,7 +23,7 @@ The objective is to build, compare, and deploy supervised machine-learning class
 * **QSO:** ~19,000 instances
 
 
-*Note:* Due to class imbalance, macro-averaged evaluation metrics are reported.
+**Note:** Due to class imbalance, macro-averaged evaluation metrics are reported.
 
 ### Input Features & Data Dictionary
 
@@ -53,9 +53,9 @@ The objective is to build, compare, and deploy supervised machine-learning class
 * **Feature Preprocessing:** Applied `StandardScaler` inside pipeline architectures for distance- and gradient-sensitive algorithms (Logistic Regression, K-Nearest Neighbors, Naive Bayes, and Support Vector Machines). Tree-based classifiers (Decision Tree) bypass feature scaling.
 ## c. GitHub repository link
 
-<PASTE YOUR GITHUB REPO URL HERE>
+<https://github.com/2026AJ05225/SGQ-stellar-classification/tree/main>
 
-Live app: <PASTE YOUR STREAMLIT URL HERE>
+Live app: <https://sgq-stellar-classification.streamlit.app/>
 
 ```
 sdss17-stellar-classifier/
