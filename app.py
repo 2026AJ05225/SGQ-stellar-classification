@@ -1,6 +1,7 @@
 """Streamlit app: evaluate saved SDSS17 classifiers on an uploaded test CSV.
 Models are loaded from model/*.joblib and are NOT retrained."""
 import os
+import sys
 import subprocess
 import joblib
 import matplotlib.pyplot as plt
